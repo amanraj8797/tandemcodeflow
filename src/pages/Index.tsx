@@ -5,9 +5,33 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, Code, BookOpen } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import VideoCard from "@/components/VideoCard";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("learn");
+  const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
+
+  // Sample technology information
+  const tech = {
+    title: "React Development",
+    students: "12,500"
+  };
+
+  // Function to handle tab change
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    
+    // Reset active video when changing tabs
+    if (value !== "videos") {
+      setActiveVideoId(null);
+    }
+  };
+
+  // Function to handle practice button click
+  const handlePracticeClick = () => {
+    // This function is a placeholder for the button's onClick handler
+    console.log("Navigate to collaborative editor");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white">
@@ -40,8 +64,8 @@ const Index = () => {
               <Code className="h-6 w-6 text-indigo-600" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold">React Development</h2>
-              <p className="text-gray-500">12,500 students enrolled</p>
+              <h2 className="text-2xl font-bold">{tech.title}</h2>
+              <p className="text-gray-500">{tech.students} students enrolled</p>
             </div>
           </div>
         </div>
@@ -72,8 +96,8 @@ const Index = () => {
                   </svg>
                   <span>Resources</span>
                 </a>
-                <a href="#" className="flex items-center space-x-2 rounded-md bg-indigo-100 px-3 py-2 text-sm font-medium text-indigo-700">
-                  <Code className="h-5 w-5 text-indigo-500" />
+                <a href="#" className="flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">
+                  <Code className="h-5 w-5 text-gray-500" />
                   <span>Practice</span>
                 </a>
                 <a href="#" className="flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">
@@ -82,8 +106,8 @@ const Index = () => {
                   </svg>
                   <span>Tests</span>
                 </a>
-                <a href="#" className="flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">
-                  <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <a href="#" onClick={() => handleTabChange("videos")} className={`flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium ${activeTab === "videos" ? "bg-indigo-100 text-indigo-700" : "text-gray-700 hover:bg-gray-100"}`}>
+                  <svg className={`h-5 w-5 ${activeTab === "videos" ? "text-indigo-500" : "text-gray-500"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>
                   <span>Videos</span>
@@ -111,7 +135,7 @@ const Index = () => {
 
           <div className="md:col-span-3">
             <div className="rounded-lg bg-white p-8 shadow-md">
-              <Tabs defaultValue="learn" onValueChange={setActiveTab} value={activeTab}>
+              <Tabs defaultValue="learn" onValueChange={handleTabChange} value={activeTab}>
                 <TabsList className="mb-8 grid w-full grid-cols-2">
                   <TabsTrigger value="learn">Learn</TabsTrigger>
                   <TabsTrigger value="practice">Practice</TabsTrigger>
@@ -154,6 +178,83 @@ const Index = () => {
                           </Link>
                         </CardContent>
                       </Card>
+                    </div>
+                  </div>
+                </TabsContent>
+                <TabsContent value="videos">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-6">Video Tutorials</h2>
+                    <p className="mb-6 text-muted-foreground">
+                      Learn {tech.title} through video lessons from top
+                      instructors.
+                    </p>
+
+                    <h3 className="text-2xl font-bold text-left mb-6">
+                      Featured Video Tutorials
+                    </h3>
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* If a video is expanded, only show that video, otherwise show all videos */}
+                        {!activeVideoId || activeVideoId === "w7ejDZ8SWv8" ? (
+                          <VideoCard
+                            title="React Crash Course"
+                            description="A complete beginner's guide to React"
+                            views="1.2M"
+                            duration="45 minutes"
+                            videoId="w7ejDZ8SWv8"
+                            isExpanded={activeVideoId === "w7ejDZ8SWv8"}
+                            setActiveVideoId={setActiveVideoId}
+                          />
+                        ) : null}
+                        
+                        {!activeVideoId || activeVideoId === "jS4aFq5-91M" ? (
+                          <VideoCard
+                            title="Advanced JavaScript Techniques"
+                            description="Master the advanced concepts and patterns"
+                            views="850K"
+                            duration="1 hour 20 minutes"
+                            videoId="jS4aFq5-91M"
+                            isExpanded={activeVideoId === "jS4aFq5-91M"}
+                            setActiveVideoId={setActiveVideoId}
+                          />
+                        ) : null}
+                        
+                        {!activeVideoId || activeVideoId === "Oe421EPjeBE" ? (
+                          <VideoCard
+                            title="Node.js Project Tutorial"
+                            description="Build a complete project from scratch"
+                            views="675K"
+                            duration="2 hours 15 minutes"
+                            videoId="Oe421EPjeBE"
+                            isExpanded={activeVideoId === "Oe421EPjeBE"}
+                            setActiveVideoId={setActiveVideoId}
+                          />
+                        ) : null}
+                        
+                        {!activeVideoId || activeVideoId === "1Rs2ND1ryYc" ? (
+                          <VideoCard
+                            title="CSS Tips and Tricks"
+                            description="Productivity hacks and best practices"
+                            views="520K"
+                            duration="55 minutes"
+                            videoId="1Rs2ND1ryYc"
+                            isExpanded={activeVideoId === "1Rs2ND1ryYc"}
+                            setActiveVideoId={setActiveVideoId}
+                          />
+                        ) : null}
+                        
+                        {!activeVideoId || activeVideoId === "30LWjhZzg50" ? (
+                          <VideoCard
+                            title="TypeScript Full Course"
+                            description="Learn TypeScript from zero to hero"
+                            views="980K"
+                            duration="1 hour 45 minutes"
+                            videoId="30LWjhZzg50"
+                            isExpanded={activeVideoId === "30LWjhZzg50"}
+                            setActiveVideoId={setActiveVideoId}
+                          />
+                        ) : null}
+                      </div>
                     </div>
                   </div>
                 </TabsContent>
