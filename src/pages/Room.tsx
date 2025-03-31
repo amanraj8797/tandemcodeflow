@@ -26,16 +26,61 @@ function HelloWorld() {
 
 // Everyone's changes will appear in real time
 // Try editing this code!`);
+  const [activeEditor, setActiveEditor] = useState<string | null>(null);
+
+  // Function to simulate code changes from other participants
+  const simulateOtherUserEditing = () => {
+    const otherUsers = participants.filter(p => !p.isCurrentUser);
+    if (otherUsers.length === 0) return;
+    
+    // Randomly select a user
+    const randomUser = otherUsers[Math.floor(Math.random() * otherUsers.length)];
+    
+    // Set them as active editor
+    setActiveEditor(randomUser.id);
+    
+    // After a delay, make a code change
+    setTimeout(() => {
+      const newComment = `\n// ${randomUser.name} made an edit at ${new Date().toLocaleTimeString()}`;
+      setCode(prevCode => prevCode + newComment);
+      
+      // After another delay, clear the active editor
+      setTimeout(() => {
+        setActiveEditor(null);
+        toast({
+          title: `${randomUser.name} made a change`,
+          description: "Their edits have been applied to the code.",
+        });
+      }, 1000);
+    }, 1000);
+  };
+
+  // Handle local user code changes
+  const handleCodeChange = (newCode: string) => {
+    // Set current user as active editor
+    setActiveEditor(participants.find(p => p.isCurrentUser)?.id || null);
+    
+    // Update the code
+    setCode(newCode);
+    
+    // Broadcast to others (simulated)
+    console.log("Broadcasting code changes to others...");
+  };
 
   // Simulate real-time updates
   useEffect(() => {
     const interval = setInterval(() => {
-      // This would be replaced with actual real-time connections
+      // This simulates periodic updates
       console.log("Checking for updates...");
-    }, 3000);
+      
+      // 30% chance of another user making an edit
+      if (Math.random() < 0.3 && !activeEditor) {
+        simulateOtherUserEditing();
+      }
+    }, 10000); // Check every 10 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [activeEditor, participants]);
 
   const copyRoomId = () => {
     navigator.clipboard.writeText(roomId || "");
@@ -76,9 +121,11 @@ function HelloWorld() {
               {participants.map((participant, i) => (
                 <div 
                   key={participant.id} 
-                  className="rounded-full w-8 h-8 flex items-center justify-center text-white font-medium text-xs border-2 border-white"
+                  className={`rounded-full w-8 h-8 flex items-center justify-center text-white font-medium text-xs border-2 ${
+                    activeEditor === participant.id ? 'border-yellow-400 ring-2 ring-yellow-300' : 'border-white'
+                  }`}
                   style={{ backgroundColor: participant.color, zIndex: participants.length - i }}
-                  title={participant.name}
+                  title={`${participant.name}${activeEditor === participant.id ? ' (editing)' : ''}`}
                 >
                   {participant.name.charAt(0)}
                 </div>
@@ -105,7 +152,9 @@ function HelloWorld() {
             {participants.map(participant => (
               <div 
                 key={participant.id} 
-                className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100"
+                className={`flex items-center space-x-2 p-2 rounded-md ${
+                  activeEditor === participant.id ? 'bg-yellow-50 border border-yellow-200' : 'hover:bg-gray-100'
+                }`}
               >
                 <div 
                   className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs"
@@ -116,6 +165,11 @@ function HelloWorld() {
                 <span className="text-sm">{participant.name}</span>
                 {participant.isCurrentUser && (
                   <Badge variant="outline" className="ml-auto text-xs">You</Badge>
+                )}
+                {activeEditor === participant.id && (
+                  <Badge variant="outline" className="ml-auto text-xs bg-yellow-100 text-yellow-800 border-yellow-200">
+                    Editing...
+                  </Badge>
                 )}
               </div>
             ))}
@@ -144,14 +198,21 @@ function HelloWorld() {
         <div className="flex-1 overflow-hidden flex flex-col">
           <div className="p-2 bg-gray-800 text-white text-sm flex justify-between items-center">
             <span>main.js</span>
-            <Badge variant="secondary" className="text-xs">
-              Real-time collaboration
-            </Badge>
+            <div className="flex items-center space-x-2">
+              {activeEditor && (
+                <Badge variant="secondary" className="text-xs bg-yellow-200 text-yellow-800">
+                  {participants.find(p => p.id === activeEditor)?.name || 'Someone'} is editing...
+                </Badge>
+              )}
+              <Badge variant="secondary" className="text-xs">
+                Real-time collaboration
+              </Badge>
+            </div>
           </div>
           <div className="flex-1 overflow-hidden">
             <CodeEditor 
               value={code} 
-              onChange={setCode} 
+              onChange={handleCodeChange} 
               language="javascript"
             />
           </div>
